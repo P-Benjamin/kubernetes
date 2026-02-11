@@ -77,3 +77,7 @@ Ensuite, 2 commandes supplémentaires doivent être exécutées pour configurer 
 - En vous mettant à la racine du projet
 - ```cmd /c "oc exec -i deployment/mysql -- mysql -uroot -proot < ./database/script.sql"``` pour construire l'architecture de la base de données.
 - ```cmd /c "oc exec -i deployment/mysql -- mysql -uroot -proot < ./database/data.sql"``` pour insérer les données dans la base.
+
+# 5. URL d'accès
+
+Le site est actuellement déployé sur openshift. Pour y accéder, vous pouvez vour rendre ici => _https://tissea-grp2.apps.openshift.kakor.ovh/_

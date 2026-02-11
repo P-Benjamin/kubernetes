@@ -20,6 +20,6 @@ spec:
               service:
                 name: tissea-back
                 port:
-                  number: 3000
+                  number: 5000
   tls:
   - {}

@@ -21,4 +21,4 @@ spec:
             - containerPort: 80
           env:
             - name: REACT_APP_API_URL
-              value: http://tissea-back:8080
+              value: http://tissea-back:5000

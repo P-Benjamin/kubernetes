@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tissea-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tissea-front
+  template:
+    metadata:
+      labels:
+        app: tissea-front
+    spec:
+      containers:
+        - name: tissea-front
+          image: harbor.kakor.ovh/ipi/ipi/ipi-grp-2-front:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: REACT_APP_API_URL
+              value: http://tissea-back:8080

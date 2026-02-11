@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tissea-back
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tissea-back
+  template:
+    metadata:
+      labels:
+        app: tissea-back
+    spec:
+      containers:
+        - name: tissea-back
+          image: harbor.kakor.ovh/ipi/ipi/ipi-grp-2-back:latest
+          ports:
+            - containerPort: 8080

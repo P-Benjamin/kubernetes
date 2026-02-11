@@ -7,14 +7,14 @@ spec:
     - host: tissea-grp2.apps.openshift.kakor.ovh
       http:
         paths:
-          - path: /(.*)
+          - path: "/"
             pathType: Prefix
             backend:
               service:
                 name: tissea-front
                 port:
                   number: 80
-          - path: /api(/|$)(.*)
+          - path: "/api"
             pathType: Prefix
             backend:
               service:

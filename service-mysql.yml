@@ -1,0 +1,14 @@
+# Service: MySQL
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: project-gp-2
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    targetPort: 3306
+    protocol: TCP
+  type: ClusterIP

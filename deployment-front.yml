@@ -14,7 +14,9 @@ spec:
     spec:
       containers:
         - name: tissea-front
-          image: harbor.kakor.ovh/ipi/ipi/ipi-grp-2-front:latest
+          image: harbor.kakor.ovh/ipi/ipi-grp-2-front:latest
+          securityContext:
+            allowPrivilegeEscalation: true
           ports:
             - containerPort: 80
           env:

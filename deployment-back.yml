@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: tissea-back
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tissea-back
@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: tissea-back
-          image: harbor.kakor.ovh/ipi/ipi/ipi-grp-2-back:latest
+          image: harbor.kakor.ovh/ipi/ipi-grp-2-back:latest
           ports:
             - containerPort: 8080

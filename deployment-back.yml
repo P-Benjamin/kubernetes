@@ -16,4 +16,4 @@ spec:
         - name: tissea-back
           image: harbor.kakor.ovh/ipi/ipi-grp-2-back:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 3000

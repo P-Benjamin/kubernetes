@@ -1,322 +1,322 @@
----
-# ConfigMap for API Configuration
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: api-config
-  namespace: project-gp-2
-data:
-  PORT: "5000"
-  NODE_ENV: "production"
-  CORS_ORIGIN: "https://tissea-grp2.apps.openshift.kakor.ovh"
-  JWT_SECRET: "your-secret-key-change-me-in-production"
+# ---
+# # ConfigMap for API Configuration
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: api-config
+#   namespace: project-gp-2
+# data:
+#   PORT: "5000"
+#   NODE_ENV: "production"
+#   CORS_ORIGIN: "https://tissea-grp2.apps.openshift.kakor.ovh"
+#   JWT_SECRET: "your-secret-key-change-me-in-production"
 
----
-# Secret for Database Credentials
-apiVersion: v1
-kind: Secret
-metadata:
-  name: db-credentials
-  namespace: project-gp-2
-type: Opaque
-stringData:
-  DB_USERNAME: "tissea_user"
-  DB_PASSWORD: "tissea_password"
-  DB_NAME: "tissea"
-  MYSQL_ROOT_PASSWORD: "root"
----
-# Deployment: MySQL Database
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql
-  namespace: project-gp-2
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mysql
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      securityContext:
-        fsGroup: 999
-      containers:
-      - name: mysql
-        image: mysql:8.0
-        ports:
-        - containerPort: 3306
-          name: mysql
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: MYSQL_ROOT_PASSWORD
-        - name: MYSQL_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: DB_NAME
-        - name: MYSQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: DB_USERNAME
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: DB_PASSWORD
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        volumeMounts:
-        - name: mysql-data
-          mountPath: /var/lib/mysql
-        livenessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - mysqladmin ping -h localhost -uroot -p$MYSQL_ROOT_PASSWORD
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - mysqladmin ping -h localhost -uroot -p$MYSQL_ROOT_PASSWORD
-          initialDelaySeconds: 20
-          periodSeconds: 5
-      volumes:
-      - name: mysql-data
-        emptyDir: {}
+# ---
+# # Secret for Database Credentials
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: db-credentials
+#   namespace: project-gp-2
+# type: Opaque
+# stringData:
+#   DB_USERNAME: "tissea_user"
+#   DB_PASSWORD: "tissea_password"
+#   DB_NAME: "tissea"
+#   MYSQL_ROOT_PASSWORD: "root"
+# ---
+# # Deployment: MySQL Database
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: mysql
+#   namespace: project-gp-2
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: mysql
+#   template:
+#     metadata:
+#       labels:
+#         app: mysql
+#     spec:
+#       securityContext:
+#         fsGroup: 999
+#       containers:
+#       - name: mysql
+#         image: mysql:8.0
+#         ports:
+#         - containerPort: 3306
+#           name: mysql
+#         env:
+#         - name: MYSQL_ROOT_PASSWORD
+#           valueFrom:
+#             secretKeyRef:
+#               name: db-credentials
+#               key: MYSQL_ROOT_PASSWORD
+#         - name: MYSQL_DATABASE
+#           valueFrom:
+#             secretKeyRef:
+#               name: db-credentials
+#               key: DB_NAME
+#         - name: MYSQL_USER
+#           valueFrom:
+#             secretKeyRef:
+#               name: db-credentials
+#               key: DB_USERNAME
+#         - name: MYSQL_PASSWORD
+#           valueFrom:
+#             secretKeyRef:
+#               name: db-credentials
+#               key: DB_PASSWORD
+#         resources:
+#           requests:
+#             memory: "256Mi"
+#             cpu: "250m"
+#           limits:
+#             memory: "512Mi"
+#             cpu: "500m"
+#         volumeMounts:
+#         - name: mysql-data
+#           mountPath: /var/lib/mysql
+#         livenessProbe:
+#           exec:
+#             command:
+#             - /bin/sh
+#             - -c
+#             - mysqladmin ping -h localhost -uroot -p$MYSQL_ROOT_PASSWORD
+#           initialDelaySeconds: 30
+#           periodSeconds: 10
+#         readinessProbe:
+#           exec:
+#             command:
+#             - /bin/sh
+#             - -c
+#             - mysqladmin ping -h localhost -uroot -p$MYSQL_ROOT_PASSWORD
+#           initialDelaySeconds: 20
+#           periodSeconds: 5
+#       volumes:
+#       - name: mysql-data
+#         emptyDir: {}
 
----
-# Service: MySQL
-apiVersion: v1
-kind: Service
-metadata:
-  name: mysql
-  namespace: project-gp-2
-spec:
-  selector:
-    app: mysql
-  ports:
-  - port: 3306
-    targetPort: 3306
-    protocol: TCP
-  type: ClusterIP
+# ---
+# # Service: MySQL
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: mysql
+#   namespace: project-gp-2
+# spec:
+#   selector:
+#     app: mysql
+#   ports:
+#   - port: 3306
+#     targetPort: 3306
+#     protocol: TCP
+#   type: ClusterIP
 
----
-# Deployment: Backend API
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: tissea-back
-  namespace: project-gp-2
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: tissea-back
-  template:
-    metadata:
-      labels:
-        app: tissea-back
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        fsGroup: 1001
-      containers:
-      - name: tissea-back
-        image: harbor.kakor.ovh/ipi/ipi-grp-2-back:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 5000
-          name: http
-        env:
-        - name: PORT
-          value: "5000"
-        - name: NODE_ENV
-          value: "production"
-        - name: DB_HOST
-          value: "mysql.project-gp-2.svc.cluster.local"
-        - name: DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: DB_USERNAME
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: DB_PASSWORD
-        - name: DB_NAME
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: DB_NAME
-        - name: CORS_ORIGIN
-          valueFrom:
-            configMapKeyRef:
-              name: api-config
-              key: CORS_ORIGIN
-        - name: JWT_SECRET
-          valueFrom:
-            configMapKeyRef:
-              name: api-config
-              key: JWT_SECRET
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /api/health
-            port: 5000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /api/health
-            port: 5000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-      imagePullSecrets:
-      - name: harbor-credentials
+# ---
+# # Deployment: Backend API
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: tissea-back
+#   namespace: project-gp-2
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: tissea-back
+#   template:
+#     metadata:
+#       labels:
+#         app: tissea-back
+#     spec:
+#       securityContext:
+#         runAsNonRoot: true
+#         runAsUser: 1001
+#         fsGroup: 1001
+#       containers:
+#       - name: tissea-back
+#         image: harbor.kakor.ovh/ipi/ipi-grp-2-back:latest
+#         imagePullPolicy: Always
+#         ports:
+#         - containerPort: 5000
+#           name: http
+#         env:
+#         - name: PORT
+#           value: "5000"
+#         - name: NODE_ENV
+#           value: "production"
+#         - name: DB_HOST
+#           value: "mysql.project-gp-2.svc.cluster.local"
+#         - name: DB_USERNAME
+#           valueFrom:
+#             secretKeyRef:
+#               name: db-credentials
+#               key: DB_USERNAME
+#         - name: DB_PASSWORD
+#           valueFrom:
+#             secretKeyRef:
+#               name: db-credentials
+#               key: DB_PASSWORD
+#         - name: DB_NAME
+#           valueFrom:
+#             secretKeyRef:
+#               name: db-credentials
+#               key: DB_NAME
+#         - name: CORS_ORIGIN
+#           valueFrom:
+#             configMapKeyRef:
+#               name: api-config
+#               key: CORS_ORIGIN
+#         - name: JWT_SECRET
+#           valueFrom:
+#             configMapKeyRef:
+#               name: api-config
+#               key: JWT_SECRET
+#         resources:
+#           requests:
+#             memory: "256Mi"
+#             cpu: "250m"
+#           limits:
+#             memory: "512Mi"
+#             cpu: "500m"
+#         livenessProbe:
+#           httpGet:
+#             path: /api/health
+#             port: 5000
+#           initialDelaySeconds: 30
+#           periodSeconds: 10
+#         readinessProbe:
+#           httpGet:
+#             path: /api/health
+#             port: 5000
+#           initialDelaySeconds: 10
+#           periodSeconds: 5
+#       imagePullSecrets:
+#       - name: harbor-credentials
 
----
-# Service: Backend API
-apiVersion: v1
-kind: Service
-metadata:
-  name: tissea-back
-  namespace: project-gp-2
-spec:
-  selector:
-    app: tissea-back
-  ports:
-  - name: http
-    port: 5000
-    targetPort: 5000
-    protocol: TCP
-  type: ClusterIP
+# ---
+# # Service: Backend API
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: tissea-back
+#   namespace: project-gp-2
+# spec:
+#   selector:
+#     app: tissea-back
+#   ports:
+#   - name: http
+#     port: 5000
+#     targetPort: 5000
+#     protocol: TCP
+#   type: ClusterIP
 
----
-# Deployment: Frontend
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: tissea-front
-  namespace: project-gp-2
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: tissea-front
-  template:
-    metadata:
-      labels:
-        app: tissea-front
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        fsGroup: 1001
-      containers:
-      - name: tissea-front
-        image: harbor.kakor.ovh/ipi/ipi-grp-2-front:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3000
-          name: http
-        env:
-        - name: VITE_API_URL
-          value: "https://api-tissea-grp2.apps.openshift.kakor.ovh"
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "250m"
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 5
+# ---
+# # Deployment: Frontend
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: tissea-front
+#   namespace: project-gp-2
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: tissea-front
+#   template:
+#     metadata:
+#       labels:
+#         app: tissea-front
+#     spec:
+#       securityContext:
+#         runAsNonRoot: true
+#         runAsUser: 1001
+#         fsGroup: 1001
+#       containers:
+#       - name: tissea-front
+#         image: harbor.kakor.ovh/ipi/ipi-grp-2-front:latest
+#         imagePullPolicy: Always
+#         ports:
+#         - containerPort: 3000
+#           name: http
+#         env:
+#         - name: VITE_API_URL
+#           value: "https://api-tissea-grp2.apps.openshift.kakor.ovh"
+#         resources:
+#           requests:
+#             memory: "128Mi"
+#             cpu: "100m"
+#           limits:
+#             memory: "256Mi"
+#             cpu: "250m"
+#         livenessProbe:
+#           httpGet:
+#             path: /
+#             port: 3000
+#           initialDelaySeconds: 30
+#           periodSeconds: 10
+#         readinessProbe:
+#           httpGet:
+#             path: /
+#             port: 3000
+#           initialDelaySeconds: 10
+#           periodSeconds: 5
 
----
-# Service: Frontend
-apiVersion: v1
-kind: Service
-metadata:
-  name: tissea-front
-  namespace: project-gp-2
-spec:
-  selector:
-    app: tissea-front
-  ports:
-  - name: http
-    port: 3000
-    targetPort: 3000
-    protocol: TCP
-  type: ClusterIP
+# ---
+# # Service: Frontend
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: tissea-front
+#   namespace: project-gp-2
+# spec:
+#   selector:
+#     app: tissea-front
+#   ports:
+#   - name: http
+#     port: 3000
+#     targetPort: 3000
+#     protocol: TCP
+#   type: ClusterIP
 
----
-# Route: Frontend
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: tissea-front
-  namespace: project-gp-2
-spec:
-  host: tissea-grp2.apps.openshift.kakor.ovh
-  to:
-    kind: Service
-    name: tissea-front
-    weight: 100
-  port:
-    targetPort: http
-  tls:
-    termination: edge
-    insecureEdgeTerminationPolicy: Redirect
+# ---
+# # Route: Frontend
+# apiVersion: route.openshift.io/v1
+# kind: Route
+# metadata:
+#   name: tissea-front
+#   namespace: project-gp-2
+# spec:
+#   host: tissea-grp2.apps.openshift.kakor.ovh
+#   to:
+#     kind: Service
+#     name: tissea-front
+#     weight: 100
+#   port:
+#     targetPort: http
+#   tls:
+#     termination: edge
+#     insecureEdgeTerminationPolicy: Redirect
 
----
-# Route: Backend API
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: tissea-back
-  namespace: project-gp-2
-spec:
-  host: api-tissea-grp2.apps.openshift.kakor.ovh
-  to:
-    kind: Service
-    name: tissea-back
-    weight: 100
-  port:
-    targetPort: http
-  tls:
-    termination: edge
-    insecureEdgeTerminationPolicy: Redirect
+# ---
+# # Route: Backend API
+# apiVersion: route.openshift.io/v1
+# kind: Route
+# metadata:
+#   name: tissea-back
+#   namespace: project-gp-2
+# spec:
+#   host: api-tissea-grp2.apps.openshift.kakor.ovh
+#   to:
+#     kind: Service
+#     name: tissea-back
+#     weight: 100
+#   port:
+#     targetPort: http
+#   tls:
+#     termination: edge
+#     insecureEdgeTerminationPolicy: Redirect

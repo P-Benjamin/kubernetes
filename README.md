@@ -6,11 +6,11 @@ Ce projet consiste à choisir un projet front et back et de réaliser l'architec
 
 # 2. Architecture
 
-L'architecture du projet se décompose en 3 parties :
+L'architecture du projet se décompose en 6 parties :
 
 __database__ :
 
-Contient les fichiers nécessaire à la création de la base de données
+Contient les fichiers nécessaire à la création de la base de données.
 
 ```
 ├── data.sql
@@ -32,19 +32,31 @@ service-front.yml     # contient la configuration du service du front
 service-mysql.yml     # contient la configuration du service de la base de données
 ```
 
+__images__ :
+
+Contient les images du site déployé.
+
+__Vérifications__ :
+
+Contient une capture d'écran de la commande ```oc get all``` affichant l'ensemble des objets déployés dans le groupe.
+
 __dockerfiles__ :
 
-Contient les fichiers dockerfile
+Contient les fichiers dockerfile.
 
 ```
 Dockerfile-back
 Dockerfile-front
 ```
 
-# 3. Procédure utilisée
-## 3.1 Création des dockerfile
+__deployment-diagram__ :
 
-Le but des dockerfile est de générer des fichiers de configuration qui seront utilisés pour build chacun des composants de l'application (1 pour le front et 1 pour le back).
+Qui est le diagramme de conception de l'architecture de déploiement.
+
+# 3. Procédure utilisée
+## 3.1 Création des dockerfiles
+
+Le but des dockerfiles est de générer des fichiers de configuration qui seront utilisés pour build chacun des composants de l'application (1 pour le front et 1 pour le back).
 
 Globalement, ces fichiers vont créer des espaces de travail éphémère où l'on va : 
 
@@ -58,10 +70,10 @@ Pour chacun des composants front et back, il fallait d'abord générer les image
 - Après avoir créer les dockerfile, il faut générer un build des composants. Pour cela => ```docker build -t harbor.kakor.ovh/ipi/<nom_image>:latest <path_vers_dockerfile>```.
 - Une fois le build généré, il nous fallait créer un tag pour renommer l'image avant de la push. ```docker tag <nom_image_build> <nouveau_nom_image_build>```.
 - Avant de push l'image tagée, il faut se connecter à Harbor avec cette commande ```docker login harbor.kakor.ovh```et renseigner les login et mot de passe correspondant.
-- Pour finir on peut ```docker push <nouveau_nom_image_build>``` et l'image est bien pousser sur le répertoire distant.
+- Pour finir on peut ```docker push <nouveau_nom_image_build>``` et l'image est bien poussée sur le répertoire distant.
 
 # 4. Installation
-Pour pouvoir utilisé le site, il faut d'abord y installer tous les éléments nécessaire à son bon fonctionnement. Pour ce faire, la première étape est de :
+Pour pouvoir utiliser le site, il faut d'abord y installer tous les éléments nécessaire à son bon fonctionnement. Pour ce faire, la première étape est de :
 
 - Télécharger le projet en cliquant sur ```Download ZIP``` dans la section _Code_ en vert.
 - Ou importer le projet via git bash par example via la commande ```git clone https://github.com/P-Benjamin/kubernetes.git```

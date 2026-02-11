@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tissea-front
+  namespace: project-gp-2
 spec:
   replicas: 1
   selector:
@@ -15,10 +16,10 @@ spec:
       containers:
         - name: tissea-front
           image: harbor.kakor.ovh/ipi/ipi-grp-2-front:latest
-          securityContext:
-            allowPrivilegeEscalation: true
           ports:
             - containerPort: 80
+          securityContext:
+            allowPrivilegeEscalation: true
           env:
             - name: REACT_APP_API_URL
-              value: http://tissea-back:5000
+              value: "http://tissea-back:5000"
